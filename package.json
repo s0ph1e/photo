@@ -1,0 +1,35 @@
+{
+  "name": "photo",
+  "version": "0.1.0",
+  "description": "Home photo library toolset.",
+  "dependencies": {
+    "bluebird": "^3.3.3",
+    "colors": "^1.1.2",
+    "exif": "^0.6.0",
+    "glob": "^7.0.0",
+    "lodash": "^4.6.1",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "progress": "^1.1.8"
+  },
+  "bin": {
+    "photo": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/titarenko/photo.git"
+  },
+  "keywords": [
+    "photo",
+    "tool",
+    "import",
+    "library",
+    "toolset"
+  ],
+  "author": "Constantin Titarenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/titarenko/photo/issues"
+  },
+  "homepage": "https://github.com/titarenko/photo#readme"
+}
