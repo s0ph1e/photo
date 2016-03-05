@@ -9,11 +9,12 @@ var fs = require('fs');
 var _ = require('lodash');
 var Promise = require('bluebird');
 
-var glob = require('glob');
-var mkdirp = Promise.promisify(require('mkdirp'));
-var stat = Promise.promisify(fs.stat);
 var ExifImage = require('exif').ExifImage;
 var colors = require('colors');
+
+var mkdirp = Promise.promisify(require('mkdirp'));
+var stat = Promise.promisify(fs.stat);
+var readdir = Promise.promisify(fs.readdir);
 
 var input = process.argv[2];
 var output = process.argv[3];
@@ -32,34 +33,62 @@ if (_.isEmpty(output)) {
 	output = '.';
 }
 
-glob(path.join(input, '**/*.+(jpg|JPG)'))
-	.on('match', handle)
-	.on('error', fail);
+walk(input);
+
+function walk (directory) {
+	return readdir(directory)
+		.then(function (entries) {
+			return entries.map(function (it) {
+				return path.join(directory, it);
+			});
+		})
+		.map(classify, { concurrency: 100 })
+		.then(function (entries) {
+			var directories = _.filter(entries, 'isDirectory');
+			var files = _.filter(entries, 'isFile');
+			return Promise
+				.resolve(files)
+				.map(handle, { concurrency: 100 })
+				.return(_.map(directories, 'path'))
+				.map(walk, { concurrency: 1 });
+		});
+}
+
+function classify (entry) {
+	return stat(entry).then(function (info) {
+		return {
+			path: entry,
+			isDirectory: info.isDirectory(),
+			isFile: info.isFile() && /\.(jpg|JPG)/.test(entry),
+			size: info.size
+		};
+	});
+}
 
 function handle (source) {
-	return getExif(source).then(function (exif) {
+	return getExif(source.path).then(function (exif) {
 		return getDestinationFilename(output, exif);
 	}).then(function (destination) {
 		return mkdirp(path.dirname(destination)).then(function () {
 			return isCopied(source, destination);
 		}).then(function (copied) {
 			if (!copied) {
-				return copy(source, destination);
+				return copy(source.path, destination);
 			} else {
 				return false;
 			}
 		}).then(function (result) {
 			if (result === false) {
-				console.log('already processed %s -> %s'.yellow, source, destination);
+				console.log('already processed %s -> %s'.yellow, source.path, destination);
 			} else {
-				console.log('processed %s -> %s'.green, source, destination);
+				console.log('processed %s -> %s'.green, source.path, destination);
 			}
 		});
 	}).catch(function (error) {
 		if (error.message.indexOf('Exif') === -1) {
 			fail(error);
 		} else {
-			console.error('skipped %s'.gray, source);
+			console.error('skipped %s'.gray, source.path);
 		}
 	});
 }
@@ -71,8 +100,8 @@ function fail (error) {
 }
 
 function isCopied (source, destination) {
-	return Promise.join(stat(source), stat(destination), function (sourceStat, destinationStat) {
-		return destinationStat.isFile() && destinationStat.size >= sourceStat.size;
+	return stat(destination).then(function (destinationStat) {
+		return destinationStat.isFile() && destinationStat.size >= source.size;
 	}).catch(function (error) {
 		if (error.code === 'ENOENT') {
 			return false;
