@@ -17,13 +17,20 @@ if (!input && !output) {
 	process.exit(-1);
 }
 
-emitter.on('skipped', it => console.log('skipped %s -> %s (%d -> %d)'.gray, it.source.path, it.destination.path, it.source.size, it.destination.size));
-emitter.on('omitted', it => console.log('omitted %s (no exif)'.yellow, it.source.path));
-emitter.on('failed', it => console.error('failed %s due to %s'.red, it.source.path, it.error.stack));
-emitter.on('succeeded', it => console.log('copied %s -> %s'.green, it.source.path, it.destination.path));
+emitter.on('skipped', it => console.log(
+	`skipped ${it.source.path} -> ${it.destination.path} (${it.source.size} -> ${it.destination.size})`.gray));
+emitter.on('omitted', it => console.log(
+	`omitted ${it.source.path} (no exif)`.yellow));
+emitter.on('failed', it => console.error(
+	`failed to copy ${it.source.path} due to ${it.error.stack}`.red));
+emitter.on('succeeded', it => console.log(
+	`copied ${it.source.path} -> ${it.destination.path}`.green));
 
 importer({
 	input: input || '.',
 	output: output || '.',
-	emitter: emitter
-}).return(0).then(process.exit).catch(error => console.error(error.stack));
+	emitter
+}).return(0).then(process.exit).catch(error => {
+	console.error(`import stopped due to unexpected ${error.stack}`.red);
+	process.exit(-1);
+});
