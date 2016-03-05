@@ -1,4 +1,4 @@
-#!/usr/bin/env node --use_strict --harmony --harmony_destructuring --harmony_array_includes
+#!/usr/bin/env node
 
 'use strict';
 
