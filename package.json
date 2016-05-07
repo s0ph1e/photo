@@ -1,6 +1,6 @@
 {
   "name": "photo",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Home photo library toolset.",
   "dependencies": {
     "bluebird": "^3.3.3",
