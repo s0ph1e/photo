@@ -1,6 +1,6 @@
 {
   "name": "photo",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Home photo library toolset.",
   "dependencies": {
     "bluebird": "^3.3.3",
@@ -28,5 +28,9 @@
   "bugs": {
     "url": "https://github.com/titarenko/photo/issues"
   },
-  "homepage": "https://github.com/titarenko/photo#readme"
+  "homepage": "https://github.com/titarenko/photo#readme",
+  "engines": {
+    "node": ">= 5"
+  },
+  "engineStrict": true
 }
