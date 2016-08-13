@@ -1,11 +1,11 @@
 {
   "name": "photo",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Home photo library toolset.",
   "dependencies": {
     "bluebird": "^3.3.3",
     "colors": "^1.1.2",
-    "fast-exif": "^0.1.2",
+    "fast-exif": "^0.2.0",
     "mkdirp": "^0.5.1"
   },
   "main": "index.js",
