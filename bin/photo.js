@@ -2,14 +2,15 @@
 
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var importer = require('../lib/importer');
-var colors = require('colors');
+const EventEmitter = require('events').EventEmitter;
+const importer = require('../lib/importer');
+const colors = require('colors');
+const path = require('path');
 
-var input = process.argv[2];
-var output = process.argv[3];
+const input = process.argv[2];
+const output = process.argv[3];
 
-var emitter = new EventEmitter();
+const emitter = new EventEmitter();
 
 if (!input && !output) {
 	console.error('neither input nor output path is specified'.red);
@@ -20,7 +21,7 @@ if (!input && !output) {
 emitter.on('skipped', it => console.log(
 	`skipped ${it.source.path} -> ${it.destination.path} (${it.source.size} -> ${it.destination.size})`.gray));
 emitter.on('omitted', it => console.log(
-	`omitted ${it.source.path} (no exif)`.yellow));
+	`copied ${it.source.path} -> ${it.destination.path} (${it.error.message})`.yellow));
 emitter.on('failed', it => console.error(
 	`failed to copy ${it.source.path} due to ${it.error.stack}`.red));
 emitter.on('succeeded', it => console.log(
@@ -29,6 +30,8 @@ emitter.on('succeeded', it => console.log(
 importer({
 	input: input || '.',
 	output: output || '.',
+	noExif: path.join(output, 'no-exif'),
+	other: path.join(output, 'other'),
 	emitter
 }).return(0).then(process.exit).catch(error => {
 	console.error(`import stopped due to unexpected ${error.stack}`.red);
